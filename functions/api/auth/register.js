@@ -6,7 +6,7 @@ export const onRequestPost = async (ctx) => {
   const cleanName = String(name || '').trim().slice(0, 40);
 
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(cleanEmail)) return fail('البريد الإلكتروني غير صالح', 422);
-  if (String(password || '').length < 8) return fail('كلمة المرور يجب أن تكون ٨ خانات على الأقل', 422);
+  if (String(password || '').length < 8) return fail('كلمة المرور يجب ألا تقل عن ٨ أحرف', 422);
   if (cleanName.length < 2) return fail('الاسم مطلوب', 422);
 
   const exists = await ctx.env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(cleanEmail).first();
@@ -20,7 +20,7 @@ export const onRequestPost = async (ctx) => {
   const id = uid();
   let pass;
   try { pass = await hashPassword(String(password)); }
-  catch { return fail('تعذّر إنشاء الحساب — جرّب لاحقاً', 500); }
+  catch { return fail('تعذّر إنشاء الحساب، يرجى المحاولة لاحقاً', 500); }
   const baseCurrency = base_currency === 'SP' ? 'SP' : 'USD';
   await ctx.env.DB.prepare(
     'INSERT INTO users (id,email,name,pass,role,status,lang,base_currency,approved_at) VALUES (?,?,?,?,?,?,?,?,?)',
@@ -32,7 +32,7 @@ export const onRequestPost = async (ctx) => {
   await audit(ctx, id, isFirst ? 'register.admin' : 'register.pending', cleanEmail);
 
   if (!isFirst) {
-    return json({ pending: true, message: 'تم إنشاء الحساب — بانتظار موافقة المدير' }, 201);
+    return json({ pending: true, message: 'تم إنشاء الحساب، وهو بانتظار موافقة المدير' }, 201);
   }
 
   const token = await makeSession(id, ctx.env);

@@ -92,7 +92,7 @@ export default function Dashboard() {
         <div className="empty"><b>{t('dash.empty')}</b>{t('dash.emptyHint')}</div>
       ) : (
         <div className="card">
-          {data.recent.map((tx) => (
+          {data.recent.slice(0, 4).map((tx) => (
             <div className="tx" key={tx.id}>
               <div className="ic">{(tx.note || t(`cat.${tx.category}`)).slice(0, 2)}</div>
               <div className="t">

@@ -11,7 +11,7 @@ export const onRequestPost = async (ctx) => {
   if (!ok) return fail('البريد أو كلمة المرور غير صحيحة', 401);
 
   if (user.status === 'pending') return fail('حسابك بانتظار موافقة المدير', 403);
-  if (user.status === 'blocked') return fail('حسابك موقوف — تواصل مع المدير', 403);
+  if (user.status === 'blocked') return fail('حسابك موقوف، يرجى التواصل مع المدير', 403);
 
   await audit(ctx, user.id, 'login', cleanEmail);
   const token = await makeSession(user.id, ctx.env);
