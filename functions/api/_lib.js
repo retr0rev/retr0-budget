@@ -32,27 +32,43 @@ const enc = new TextEncoder();
 export async function hashPassword(password) {
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt, iterations: 150000, hash: 'SHA-256' }, key, 256,
+  // Workers يقبل حتى 100000 تكرار فقط — نتجاوز ذلك بجولتين متتاليتين (200k فعليًا)
+  let bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, key, 256,
   );
-  return `pbkdf2$150000$${b64u(salt)}$${b64u(bits)}`;
+  const key2 = await crypto.subtle.importKey('raw', bits, 'PBKDF2', false, ['deriveBits']);
+  bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, key2, 256,
+  );
+  return `pbkdf2$2x100000$${b64u(salt)}$${b64u(bits)}`;
 }
 
 export async function verifyPassword(password, stored) {
   try {
     const [scheme, iterStr, saltB64, hashB64] = String(stored).split('$');
     if (scheme !== 'pbkdf2') return false;
+    const rounds = iterStr === '2x100000' ? 2 : 1;
+    const iterations = iterStr === '2x100000' ? 100000 : Number(iterStr);
     const salt = unb64u(saltB64);
-    const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
-    const bits = new Uint8Array(
-      await crypto.subtle.deriveBits(
-        { name: 'PBKDF2', salt, iterations: Number(iterStr), hash: 'SHA-256' }, key, 256,
-      ),
+
+    let bits = await crypto.subtle.deriveBits(
+      { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
+      await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']),
+      256,
     );
+    for (let r = 1; r < rounds; r++) {
+      bits = await crypto.subtle.deriveBits(
+        { name: 'PBKDF2', salt, iterations, hash: 'SHA-256' },
+        await crypto.subtle.importKey('raw', bits, 'PBKDF2', false, ['deriveBits']),
+        256,
+      );
+    }
+
+    const got = new Uint8Array(bits);
     const expected = unb64u(hashB64);
-    if (bits.length !== expected.length) return false;
+    if (got.length !== expected.length) return false;
     let diff = 0;
-    for (let i = 0; i < bits.length; i++) diff |= bits[i] ^ expected[i];
+    for (let i = 0; i < got.length; i++) diff |= got[i] ^ expected[i];
     return diff === 0;
   } catch { return false; }
 }

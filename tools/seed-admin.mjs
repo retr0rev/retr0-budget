@@ -16,8 +16,9 @@ if (!email || !pass) {
 
 const b64u = (b) => b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const salt = crypto.randomBytes(16);
-const bits = crypto.pbkdf2Sync(pass, salt, 150000, 32, 'sha256');
-const hash = `pbkdf2$150000$${b64u(salt)}$${b64u(bits)}`;
+let bits = crypto.pbkdf2Sync(pass, salt, 100000, 32, 'sha256');
+bits = crypto.pbkdf2Sync(bits, salt, 100000, 32, 'sha256');
+const hash = `pbkdf2$2x100000$${b64u(salt)}$${b64u(bits)}`;
 const id = 'p' + crypto.randomBytes(10).toString('hex');
 
 const esc = (s) => String(s).replace(/'/g, "''");

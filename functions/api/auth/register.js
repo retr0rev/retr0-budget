@@ -18,7 +18,9 @@ export const onRequestPost = async (ctx) => {
   const status = isFirst ? 'active' : 'pending';        // البقية بانتظار موافقة المدير
 
   const id = uid();
-  const pass = await hashPassword(String(password));
+  let pass;
+  try { pass = await hashPassword(String(password)); }
+  catch { return fail('تعذّر إنشاء الحساب — جرّب لاحقاً', 500); }
   const baseCurrency = base_currency === 'SP' ? 'SP' : 'USD';
   await ctx.env.DB.prepare(
     'INSERT INTO users (id,email,name,pass,role,status,lang,base_currency,approved_at) VALUES (?,?,?,?,?,?,?,?,?)',

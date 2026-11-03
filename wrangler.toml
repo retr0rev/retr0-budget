@@ -5,4 +5,4 @@ compatibility_date = "2026-01-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "retr0-budget-db"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "6f63c658-e1c6-4c91-9235-b02016fb127d"

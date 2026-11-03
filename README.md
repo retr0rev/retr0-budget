@@ -78,5 +78,6 @@ npx wrangler pages deploy dist --project-name retr0-budget
 ## Notes
 
 - The session cookie is `HttpOnly`, `SameSite=Lax`, `Secure`, 30 days, HMAC-SHA256 over `userId.expiry`.
+- **Password hashing runs PBKDF2-SHA256 in two 100k rounds** — the Workers runtime rejects `iterations > 100000`, so a single high-iteration call throws and every login silently fails. The stored format is `pbkdf2$2x100000$salt$hash`.
 - Admins cannot change their own role/status or delete themselves.
 - Deleting a user cascades to their transactions and budgets.
