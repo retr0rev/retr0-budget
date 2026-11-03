@@ -1,0 +1,15 @@
+node_modules/
+dist/
+logs/
+.dev.vars
+.wrangler/
+tools/oauth-pkce.json
+*.log
+.DS_Store
+
+# local test artifacts
+admin.txt
+client.txt
+c.txt
+logs-boot.txt
+shots/
