@@ -212,11 +212,20 @@ html[dir="ltr"] .stats .v{text-align:left}
 .table{background:var(--paper);border:1px solid var(--rule);border-radius:var(--r);overflow:hidden}
 .trow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:13px 14px;border-bottom:1px solid var(--rule)}
 .trow:last-child{border-bottom:0}
+.trow .who{min-width:0}
 .trow .who .n{font-size:13.5px;font-weight:600}
-.trow .who small{display:block;font-size:11px;color:var(--muted);font-family:var(--en);margin-top:2px}
-.trow .right{display:flex;align-items:center;gap:8px}
-.role{font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:99px;border:1px solid var(--rule);color:var(--muted);letter-spacing:.02em}
+.trow .who small{display:block;font-size:11px;color:var(--muted);font-family:var(--en);margin-top:2px;overflow-wrap:anywhere}
+.trow .right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.role{font-size:10.5px;font-weight:700;padding:4px 9px;border-radius:99px;border:1px solid var(--rule);color:var(--muted);letter-spacing:.02em;white-space:nowrap}
 .role.admin{background:var(--ink);color:#F7F4EA;border-color:var(--ink)}
+
+/* على الجوال: سطر البيانات فوق، والأزرار في سطر مستقل كامل العرض فلا يُقتطع زر */
+@media (max-width:640px){
+  .trow{grid-template-columns:1fr;gap:9px;padding:12px}
+  .trow .right{justify-content:flex-start;width:100%}
+  .trow .right .btn.sm{padding:8px 11px;font-size:12.5px}
+  .trow .right .del{width:32px;height:32px;border:1px solid var(--rule);opacity:1}
+}
 
 /* ---------- misc ---------- */
 .toast{
